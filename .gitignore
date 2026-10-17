@@ -1,0 +1,132 @@
+# ============================================================
+# Python
+# ============================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ============================================================
+# Entornos virtuales
+# ============================================================
+venv/
+env/
+ENV/
+.venv/
+env.bak/
+.python-version
+
+# ============================================================
+# Jupyter
+# ============================================================
+.ipynb_checkpoints/
+*.ipynb_checkpoints/
+
+# ============================================================
+# IDEs y editores
+# ============================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.bak
+*.tmp
+
+# ============================================================
+# Logs y temporales
+# ============================================================
+*.log
+*.pid
+*.seed
+*.pid.lock
+.cache/
+
+# ============================================================
+# Sistema operativo
+# ============================================================
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+ehthumbs.db
+Thumbs.db
+*.[Dd]b
+
+# ============================================================
+# Datos del proyecto (NO subir al repo - se regenera)
+# ============================================================
+# Imágenes de minerales (42 MB) - regenerables con src/extraer_imagenes.py
+data/dataset/train/
+data/dataset/val/
+data/dataset/test/
+# Cache de features
+data/features*.joblib
+# Jobs de demo / predicción
+*.joblib.bak
+
+# ============================================================
+# Documentos de la universidad (privados)
+# ============================================================
+# El archivo .odt del taller no se sube (es material del curso)
+docs/TAREA_2_FILTROS_Y_CLASIFICACION_2026-2.odt
+
+# ============================================================
+# Lock files (LibreOffice)
+# ============================================================
+*.~lock.*
+.~lock.*
+
+# ============================================================
+# Resultados generados (se regeneran con ./run.sh)
+# ============================================================
+# NO subir los .png y .csv — son regenerables
+# Mantenerlos solo localmente
+# results/figures/*.png
+# results/tables/*.csv
+
+# ============================================================
+# Modelos entrenados (opcional, ~1.1 MB)
+# ============================================================
+# Descomentar si quieres subir el modelo entrenado:
+# model/modelo_minerales.pkl
+
+# ============================================================
+# Misc
+# ============================================================
+*.swp
+*.bak
+*.orig
+*.rej
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.tox/
+.nox/
+
+# ============================================================
+# Outputs de scripts
+# ============================================================
+# Si ejecutas predecir.py y guardas outputs
+prediction_output_*
+debug_*.log
