@@ -1,5 +1,5 @@
 Modelo,Accuracy,F1 macro
-Random Forest (E3),0.7777777777777778,0.7806157550739594
-"MLP (E3, gridsearch)",0.75,0.7450851393188854
-SVM (E3),0.8333333333333334,0.8359133126934983
-"Ensemble (soft, 3 modelos)",0.8333333333333334,0.8359133126934983
+Random Forest (E3),0.722,0.728
+"MLP (E3, gridsearch)",0.75,0.745
+SVM (E3),0.75,0.75
+"Ensemble (soft, 3 modelos)",0.778,0.773

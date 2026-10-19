@@ -78,10 +78,12 @@ def main():
         # Generar augmentaciones a partir de las imágenes existentes
         for i in range(n_to_generate):
             src = existing[i % len(existing)]
-            img = cv2.imread(str(src), cv2.IMREAD_COLOR)
+            img = cv2.imdecode(np.fromfile(str(src), np.uint8), cv2.IMREAD_COLOR)  # rutas Unicode
             aug = augment_image(img)
             out_name = f"aug_{i:03d}.jpg"
-            cv2.imwrite(str(train_dir / out_name), aug, [cv2.IMWRITE_JPEG_QUALITY, 92])
+            ok, buf = cv2.imencode(".jpg", aug, [cv2.IMWRITE_JPEG_QUALITY, 92])
+            if ok:
+                buf.tofile(str(train_dir / out_name))
 
     print("\n✓ Augmentation completada")
     print("\nDistribución final:")

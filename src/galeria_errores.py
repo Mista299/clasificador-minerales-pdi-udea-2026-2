@@ -75,7 +75,7 @@ else:
     axes = np.atleast_1d(axes).ravel()
 
     for i, e in enumerate(errors):
-        img = cv2.imread(str(e["path"]))
+        img = clasificador.imread_safe(e["path"])
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         axes[i].imshow(img)
         axes[i].set_title(

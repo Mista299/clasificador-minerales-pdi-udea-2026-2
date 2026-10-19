@@ -30,7 +30,7 @@ joblib>=1.3
 pyarrow>=15.0   # requerido por datasets de HuggingFace (solo si re-descargas)
 huggingface_hub>=0.20  # solo si re-descargas el dataset
 
-# Opcionales para interfaz gráfica (las usará tu compañero)
+# Interfaz gráfica web (app.py)
 Pillow>=10.0
-gradio>=4.0    # opción recomendada por simplicidad
-# streamlit>=1.30   # alternativa
+streamlit>=1.30
+# gradio>=4.0   # alternativa

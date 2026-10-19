@@ -27,6 +27,19 @@ DATA = Path(__file__).resolve().parent.parent / "data" / "dataset"
 CLASSES = ["cuarzo", "pirita", "malaquita", "hematita"]
 
 
+def imread_safe(path):
+    """cv2.imread tolerante a rutas con tildes/Unicode (Windows)."""
+    return cv2.imdecode(np.fromfile(str(path), np.uint8), cv2.IMREAD_COLOR)
+
+
+def imwrite_safe(path, img, params=None):
+    """cv2.imwrite tolerante a rutas con tildes/Unicode (Windows)."""
+    ok, buf = cv2.imencode(Path(str(path)).suffix or ".jpg", img, params or [])
+    if ok:
+        buf.tofile(str(path))
+    return ok
+
+
 def preprocess(img_bgr, target_size=(128, 128)):
     """Resize + blur + CLAHE + Otsu → (img_eq, gray, mask)."""
     img = cv2.resize(img_bgr, target_size, interpolation=cv2.INTER_AREA)
@@ -136,7 +149,7 @@ def load_split(split):
     for idx, cls in enumerate(CLASSES):
         d = DATA / split / cls
         for f in sorted(d.glob("*.jpg")):
-            X_img.append(cv2.imread(str(f), cv2.IMREAD_COLOR))
+            X_img.append(imread_safe(f))
             y.append(idx)
     return X_img, np.array(y)
 

@@ -25,20 +25,30 @@
 # 1. Instalar dependencias
 pip install -r requirements.txt
 
-# 2. (Solo primera vez) Descargar el dataset desde HuggingFace
-python3 src/extraer_imagenes.py
+# 2. Ejecutar TODO de una vez (Parte 1 filtros + Parte 2 pipeline completo)
+#    Descarga el dataset de HuggingFace automáticamente si hace falta.
+python ejecutar_todo.py
 
-# 3. Ejecutar el pipeline completo end-to-end
-./run.sh
+# Opciones del orquestador:
+python ejecutar_todo.py --solo-parte1   # solo taller de filtros (Módulos A–E)
+python ejecutar_todo.py --solo-parte2   # solo pipeline del clasificador
+python ejecutar_todo.py --solo-app      # solo la interfaz web
+python ejecutar_todo.py --app           # pipeline y al final abre la interfaz web
 
-# 4. Predecir sobre una imagen
-python3 src/predecir.py mi_foto.jpg
+# 3. Predecir sobre una imagen
+python src/predecir.py mi_foto.jpg
 
-# 5. Demo rápido
-python3 src/predecir.py --demo
+# 4. Demo rápido
+python src/predecir.py --demo
+
+# 5. Interfaz web (subir imágenes, elegir modelo)
+python -m streamlit run app.py
 ```
 
-Tiempo del pipeline completo: ~3–5 min (descarga inicial toma más).
+Alternativa por pasos (Linux/Git Bash): `./run.sh` ejecuta solo la Parte 2.
+En Windows usar siempre `python -m streamlit` (el ejecutable `streamlit` puede no estar en el PATH).
+
+Tiempo del pipeline completo: ~3–5 min (la primera descarga del dataset toma más, ~7 GB temporales que se limpian solos).
 
 ---
 
@@ -47,6 +57,7 @@ Tiempo del pipeline completo: ~3–5 min (descarga inicial toma más).
 ```
 trabajo2/
 ├── README.md                       # este archivo
+├── app.py                          # ⭐ interfaz web (Streamlit)
 ├── run.sh                          # ⭐ pipeline end-to-end (10 pasos)
 ├── requirements.txt                # dependencias
 ├── INSTALACION.md                  # guía de instalación
@@ -161,7 +172,7 @@ trabajo2/
 | **Modelo .pkl serializado** | ✅ (`model/modelo_minerales.pkl`) |
 | Fotos propias con celular | ⏳ **Pendiente tuyo** |
 | ≥10 fotos de escena | ⏳ **Pendiente tuyo** |
-| Interfaz gráfica | 🔄 A cargo del compañero |
+| Interfaz gráfica | ✅ (`app.py`, Streamlit) |
 
 ---
 
@@ -180,11 +191,18 @@ trabajo2/
    ```
 5. **Compartir el modelo** (`model/modelo_minerales.pkl`) con tu compañero para la GUI
 
-## 🔄 Para tu compañero
+## 🔄 Interfaz gráfica
 
-1. Cargar `model/modelo_minerales.pkl` en la interfaz
-2. Ver `docs/MODELO_README.md` para instrucciones
-3. Sugerencia: usar **Gradio** o **Streamlit** (más rápido que Tkinter/PyQt)
+Implementada en `app.py` con **Streamlit**:
+
+```bash
+streamlit run app.py
+```
+
+- Carga `model/modelo_minerales.pkl` (ver `docs/MODELO_README.md`)
+- Permite subir una o varias imágenes (jpg, png, bmp)
+- Selector de modelo: Voting Ensemble, Random Forest, MLP, SVM (los 3 últimos se extraen ya entrenados del ensemble) o comparación de los 4
+- Muestra predicción, barras de probabilidad por clase, preprocesamiento (CLAHE/gris/máscara Otsu) y resumen en lote
 
 ---
 

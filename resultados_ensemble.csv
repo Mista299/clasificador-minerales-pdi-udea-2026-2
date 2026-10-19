@@ -1,0 +1,5 @@
+Ensemble,CV Acc μ±σ,CV F1 μ±σ,Test Acc,Test F1
+Soft Voting (RF+MLP+SVM),0.894±0.026,0.894±0.025,0.778,0.773
+Hard Voting (RF+MLP+SVM),0.889±0.023,0.889±0.022,0.750,0.748
+Soft Voting (RF+MLP),0.875±0.026,0.875±0.025,0.750,0.745
+Soft Voting (MLP+SVM),0.878±0.032,0.878±0.031,0.750,0.745

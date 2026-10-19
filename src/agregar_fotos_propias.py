@@ -19,6 +19,7 @@ import sys
 from pathlib import Path
 import shutil
 import cv2
+import numpy as np
 
 DATA = Path(__file__).resolve().parent.parent / "data" / "dataset"
 SPLIT = "test"   # las fotos propias van al test set
@@ -71,7 +72,7 @@ def main():
             if f.suffix.lower() not in {".jpg", ".jpeg", ".png"}:
                 continue
             # Validar que se puede leer
-            img = cv2.imread(str(f))
+            img = cv2.imdecode(np.fromfile(str(f), np.uint8), cv2.IMREAD_COLOR)
             if img is None:
                 print(f"  ⚠ No se pudo leer: {f.name}")
                 continue

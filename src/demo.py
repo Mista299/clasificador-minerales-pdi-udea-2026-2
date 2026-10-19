@@ -17,7 +17,7 @@ import clasificador
 
 # Cargar modelo
 MODEL_PATH = Path(__file__).resolve().parent.parent / "model" / "modelo_minerales.pkl"
-    bundle = joblib.load(str(MODEL_PATH))
+bundle = joblib.load(str(MODEL_PATH))
 modelo = bundle["modelo"]
 scaler = bundle["scaler"]
 clases = bundle["clases"]
@@ -31,7 +31,7 @@ print(f"Accuracy en test: {bundle['accuracy_test']:.3f}\n")
 
 def predecir_y_explicar(path_imagen):
     """Predice sobre una imagen y devuelve la figura explicativa."""
-    img_bgr = cv2.imread(path_imagen)
+    img_bgr = clasificador.imread_safe(path_imagen)
     if img_bgr is None:
         print(f"  ⚠ No se pudo leer: {path_imagen}")
         return None
@@ -102,7 +102,7 @@ for cls, path in test_files:
     if plt is not None:
         # Predecir también para imprimir
         bundle2 = bundle
-        img = cv2.imread(path)
+        img = clasificador.imread_safe(path)
         feats = clasificador.extract_features(img)
         feats_s = scaler.transform(feats[bundle2["slice_start"]:bundle2["slice_end"]].reshape(1, -1))
         pred = bundle2["modelo"].predict(feats_s)[0]

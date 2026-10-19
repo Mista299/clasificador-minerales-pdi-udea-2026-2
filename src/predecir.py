@@ -20,7 +20,7 @@ RESET = "\033[0m"
 
 def predecir(path_imagen: str, bundle: dict) -> tuple[str, np.ndarray]:
     """Devuelve (clase_predicha, vector_de_probabilidades)."""
-    img_bgr = cv2.imread(path_imagen)
+    img_bgr = clasificador.imread_safe(path_imagen)
     if img_bgr is None:
         raise FileNotFoundError(f"No se pudo leer: {path_imagen}")
     feats_all = clasificador.extract_features(img_bgr)

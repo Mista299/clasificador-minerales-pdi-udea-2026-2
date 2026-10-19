@@ -1,0 +1,51 @@
+Collecting huggingface_hub
+  Downloading huggingface_hub-2.2.0-py3-none-any.whl.metadata (16 kB)
+Collecting click<9.0.0,>=8.4.2 (from huggingface_hub)
+  Downloading click-8.5.0-py3-none-any.whl.metadata (2.6 kB)
+Collecting filelock>=3.10.0 (from huggingface_hub)
+  Downloading filelock-4.2.4-py3-none-any.whl.metadata (2.0 kB)
+Collecting fsspec>=2023.5.0 (from huggingface_hub)
+  Downloading fsspec-2026.9.0-py3-none-any.whl.metadata (10 kB)
+Collecting hf-xet<2.0.0,>=1.6.0 (from huggingface_hub)
+  Downloading hf_xet-1.7.0-cp38-abi3-win_amd64.whl.metadata (4.9 kB)
+Collecting httpx2<3,>=2.0.0 (from huggingface_hub)
+  Downloading httpx2-2.14.0-py3-none-any.whl.metadata (10 kB)
+Requirement already satisfied: packaging>=20.9 in C:\Users\FervKa\.pyenv\pyenv-win\versions\3.13.2\Lib\site-packages (from huggingface_hub) (25.0)
+Collecting pyyaml>=5.1 (from huggingface_hub)
+  Using cached pyyaml-6.0.3-cp313-cp313-win_amd64.whl.metadata (2.4 kB)
+Collecting tqdm>=4.42.1 (from huggingface_hub)
+  Downloading tqdm-4.70.1-py3-none-any.whl.metadata (57 kB)
+Requirement already satisfied: typing-extensions>=4.1.0 in C:\Users\FervKa\.pyenv\pyenv-win\versions\3.13.2\Lib\site-packages (from huggingface_hub) (4.16.0)
+Requirement already satisfied: anyio>=4.10 in C:\Users\FervKa\.pyenv\pyenv-win\versions\3.13.2\Lib\site-packages (from httpx2<3,>=2.0.0->huggingface_hub) (4.15.1)
+Collecting httpcore2==2.14.0 (from httpx2<3,>=2.0.0->huggingface_hub)
+  Downloading httpcore2-2.14.0-py3-none-any.whl.metadata (27 kB)
+Collecting idna>=3.18 (from httpx2<3,>=2.0.0->huggingface_hub)
+  Downloading idna-3.20-py3-none-any.whl.metadata (7.2 kB)
+Collecting truststore>=0.10 (from httpx2<3,>=2.0.0->huggingface_hub)
+  Downloading truststore-0.10.5-py3-none-any.whl.metadata (4.5 kB)
+Requirement already satisfied: h11>=0.16 in C:\Users\FervKa\.pyenv\pyenv-win\versions\3.13.2\Lib\site-packages (from httpcore2==2.14.0->httpx2<3,>=2.0.0->huggingface_hub) (0.16.0)
+Requirement already satisfied: colorama in C:\Users\FervKa\.pyenv\pyenv-win\versions\3.13.2\Lib\site-packages (from tqdm>=4.42.1->huggingface_hub) (0.4.6)
+Downloading huggingface_hub-2.2.0-py3-none-any.whl (839 kB)
+   ---------------------------------------- 839.9/839.9 kB 11.5 MB/s  0:00:00
+Downloading click-8.5.0-py3-none-any.whl (125 kB)
+Downloading hf_xet-1.7.0-cp38-abi3-win_amd64.whl (3.8 MB)
+   ---------------------------------------- 3.8/3.8 MB 52.5 MB/s  0:00:00
+Downloading httpx2-2.14.0-py3-none-any.whl (96 kB)
+Downloading httpcore2-2.14.0-py3-none-any.whl (84 kB)
+Downloading filelock-4.2.4-py3-none-any.whl (162 kB)
+Downloading fsspec-2026.9.0-py3-none-any.whl (221 kB)
+Downloading idna-3.20-py3-none-any.whl (69 kB)
+Using cached pyyaml-6.0.3-cp313-cp313-win_amd64.whl (154 kB)
+Downloading tqdm-4.70.1-py3-none-any.whl (80 kB)
+Downloading truststore-0.10.5-py3-none-any.whl (19 kB)
+Installing collected packages: truststore, tqdm, pyyaml, idna, hf-xet, fsspec, filelock, click, httpcore2, httpx2, huggingface_hub
+  Attempting uninstall: idna
+    Found existing installation: idna 3.10
+    Uninstalling idna-3.10:
+      Successfully uninstalled idna-3.10
+  Attempting uninstall: click
+    Found existing installation: click 8.1.8
+    Uninstalling click-8.1.8:
+      Successfully uninstalled click-8.1.8
+
+Successfully installed click-8.5.0 filelock-4.2.4 fsspec-2026.9.0 hf-xet-1.7.0 httpcore2-2.14.0 httpx2-2.14.0 huggingface_hub-2.2.0 idna-3.20 pyyaml-6.0.3 tqdm-4.70.1 truststore-0.10.5
