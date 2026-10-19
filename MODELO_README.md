@@ -5,7 +5,7 @@
 - **v2:** Voting ensemble (RF+MLP+SVM) con Color+GLCM → **test 83.3%, CV5 92.8%** ⭐
 
 ## Archivo
-- `modelo_minerales.pkl` (~1214.7 KB)
+- `modelo_minerales.pkl` (~1149.5 KB)
 
 ## Contenido
 ```python
@@ -43,7 +43,7 @@ print(f'{pred.upper()} ({proba.max()*100:.1f}% confianza)')
 ```
 
 ## Métricas del ensemble
-- Accuracy en test: 0.778
+- Accuracy en test: 0.833
 - Accuracy CV 5-fold: 0.928 ± 0.025
 - F1 macro CV 5-fold: 0.928 ± 0.025
 
