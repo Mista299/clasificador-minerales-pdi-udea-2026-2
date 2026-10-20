@@ -154,35 +154,30 @@ def read_slice(path, start, end):
 # Rangos exactos (verificados manualmente)
 # ============================================================================
 # tarea2_parte1_modulos_a_b_(2).py
-# Los rangos capturan el código Python real de cada módulo. El markdown
-# explicativo ya está en celdas markdown separadas generadas por el script.
+# Cada rango captura SOLO el código Python real de cada sección.
+# Los títulos y descripciones markdown van en celdas markdown separadas
+# generadas por este script (celdas que preceden a cada code cell).
 A_RANGES = {
-    "config":   (1, 40),       # título + cómo usar + librerías
-    "imgs":     (40, 188),     # imágenes + 0.3 (definición de funciones auxiliares)
-    "a1":       (197, 360),    # A.1: incluye docstring + código de convolución
-    "a2":       (314, 419),    # A.2: código de ruido
-    "a3":       (419, 654),    # A.3 batalla + A.3b + A.4
-    "a3b":      (419, 654),    # alias
-    "a4":       (419, 654),    # alias
-    "b1":       (654, 759),    # B.1 gradientes
-    "b2":       (759, 838),    # B.2 Laplaciano
-    "b3":       (838, 968),    # B.3 Canny + regla automática
-    "b4":       (968, 1079),   # B.4 unsharp
-    "extras":   (1079, 1224),  # filtro homomórfico + Laws + galería + conclusiones
+    "config":    (1, 40),       # título + cómo usar + librerías
+    "imgs":      (40, 188),     # imágenes + 0.3 (funciones auxiliares)
+    "a1":        (200, 360),    # A.1: BORDES, _pad, conv2d_pixel, conv2d_ciclos, etc.
+    "a2":        (317, 419),    # A.2: funciones de ruido
+    "a3":        (425, 654),    # A.3 batalla + A.3b barrido (sin markdown)
+    "a4":        (503, 654),    # A.4 separabilidad (sin markdown inicial)
+    "b1":        (674, 759),    # B.1 gradientes
+    "b2":        (771, 838),    # B.2 Laplaciano + LoG + DoG
+    "b3":        (849, 968),    # B.3 Canny + histéresis
+    "b4":        (977, 1079),   # B.4 unsharp masking
+    "extras":    (1079, 1224),  # filtro homomórfico + Laws + galería
 }
 
 # tarea2_parte1_modulos_c_d_e.py
 CDE_RANGES = {
     "header":   (1, 33),       # título + cómo usar + librerías
     "imgs":     (33, 195),     # imágenes + auxiliares
-    "c1":       (197, 326),    # C.1: código después del docstring
-    "c2":       (326, 530),    # C.2 + D.1 + D.2 + D.3 + D.4 + pregunta 1.8
-    "d1":       (326, 530),    # alias
-    "d2":       (326, 530),    # alias
-    "d3":       (326, 530),    # alias
-    "d4":       (326, 530),    # alias
-    "e1":       (533, 663),    # E.1 banco Gabor + efecto σ + E.2 + pregunta 1.9
-    "e2":       (533, 663),    # alias
+    "c1":       (220, 326),    # C.1 transformaciones de intensidad
+    "d1_d4":    (326, 530),    # D.1-D.4 dominio de la frecuencia
+    "e1_e2":    (533, 663),    # E.1 banco Gabor + E.2 vector de textura
     "extras":   (663, 713),    # galería + conclusiones
 }
 
@@ -292,7 +287,6 @@ nb.cells.append(md_cell("""### A.3b Barrido sistemático de parámetros
 
 Variamos sistemáticamente los parámetros del catálogo del enunciado (Tabla 2.1): tamaños de kernel (k=3, 5, 9, 15), σ del Gaussiano (0.5, 1, 2, 4), medianas (k=3, 5, 7), parámetros del bilateral. Esto genera una rejilla de combinaciones que confirma las observaciones puntuales de A.3."""))
 
-nb.cells.append(code_cell(make_executable(read_slice(PY_A, *A_RANGES["a3b"]))))
 
 nb.cells.append(md_cell("""### A.4 Separabilidad del kernel Gaussiano
 
@@ -486,7 +480,6 @@ Aplicamos la transformación logarítmica a la magnitud de la FFT de una imagen 
 
 El log comprime el rango dinámico enorme del espectro (razón max/mediana ≈ 9000×) y revela direcciones privilegiadas, picos de patrones periódicos y el decaimiento radial típico de las imágenes naturales."""))
 
-nb.cells.append(code_cell(make_executable(read_slice(PY_CDE, *CDE_RANGES["c2"]))))
 
 # ----- Pregunta 1.6 -----
 nb.cells.append(md_cell("""## 📝 Pregunta 1.6 – Rango dinámico
@@ -527,7 +520,6 @@ Calculamos la FFT 2D, centramos con `fftshift` y mostramos magnitud (escala log)
 
 **Conclusión esperada.** La fase conserva más estructura perceptual que la magnitud."""))
 
-nb.cells.append(code_cell(make_executable(read_slice(PY_CDE, *CDE_RANGES["d1"]))))
 
 nb.cells.append(md_cell("""### D.2 Filtros paso bajo y paso alto: Ideal, Butterworth (n = 1, 2, 4) y Gaussiano
 
@@ -543,7 +535,6 @@ Implementamos los filtros Ideal, Butterworth (n = 1, 2, 4) y Gaussiano para D₀
 
 Para n≥4, Butterworth también presenta ringing, aunque menor. El Gaussiano es siempre la opción más segura."""))
 
-nb.cells.append(code_cell(make_executable(read_slice(PY_CDE, *CDE_RANGES["d2"]))))
 
 nb.cells.append(md_cell("""### D.3 Eliminación de ruido periódico (filtro rechaza-banda / notch)
 
@@ -551,7 +542,6 @@ Sumamos a la imagen un patrón sinusoidal (por ejemplo $20\\sin(2\\pi \\cdot 0.1
 
 Para N=512 y f=0.1 ciclos/px, los picos aparecen en $(\\Delta u, \\Delta v) = (\\pm 51, 0)$ en el espectro centrado."""))
 
-nb.cells.append(code_cell(make_executable(read_slice(PY_CDE, *CDE_RANGES["d3"]))))
 
 nb.cells.append(md_cell("""### D.4 Equivalencia espacio–frecuencia
 
@@ -561,7 +551,6 @@ $$\\sigma_{espacial} \\approx \\frac{N}{2\\pi \\cdot D_0}$$
 
 Para N=512, D₀=30 → σ ≈ 2.72 px. Error máximo en interior (margen de 11 px): **6.73×10⁻³** — efectivamente idéntico, salvo por las condiciones de borde (la FFT asume periodicidad, mientras que `cv2.GaussianBlur` espeja los bordes)."""))
 
-nb.cells.append(code_cell(make_executable(read_slice(PY_CDE, *CDE_RANGES["d4"]))))
 
 # ----- Preguntas 1.7–1.8 -----
 nb.cells.append(md_cell("""## 📝 Preguntas conceptuales del Módulo D
@@ -616,13 +605,12 @@ donde $(x', y')$ es el plano rotado por θ. Responde fuertemente a texturas con 
 
 Construimos un banco de **4 orientaciones** (0°, 45°, 90°, 135°) × **3 longitudes de onda** $\\lambda$ con `cv2.getGaborKernel`. Visualizamos los kernels y las respuestas sobre una imagen con texturas (tela, ladrillo, madera u hojas). Estudiamos el efecto del ancho de la envolvente σ."""))
 
-nb.cells.append(code_cell(make_executable(read_slice(PY_CDE, *CDE_RANGES["e1"]))))
+nb.cells.append(code_cell(make_executable(read_slice(PY_CDE, *CDE_RANGES["e1_e2"]))))
 
 nb.cells.append(md_cell("""### E.2 Vector de textura de 24 características
 
 Para cada respuesta del banco, calculamos la **media** y la **desviación estándar** de la energía. Concatenamos esos valores en un vector de **24 características** (12 filtros × 2 estadísticas) y lo comparamos entre dos texturas distintas. Estudiamos qué pasa si rotamos la textura 90° (preludio de la Pregunta 1.9)."""))
 
-nb.cells.append(code_cell(make_executable(read_slice(PY_CDE, *CDE_RANGES["e2"]))))
 
 # ----- Pregunta 1.9 -----
 nb.cells.append(md_cell("""## 📝 Pregunta 1.9 – Orientación
