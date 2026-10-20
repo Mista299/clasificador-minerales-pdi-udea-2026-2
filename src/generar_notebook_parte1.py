@@ -23,81 +23,126 @@ def md_cell(source):
 def code_cell(source):
     return nbf.v4.new_code_cell(source.rstrip())
 
-def to_python_code(text):
-    """Convierte un texto (mezcla de código y markdown-comentado) en código
-    Python ejecutable, comentando cualquier línea que no sea código Python
-    válido. Mantiene la información textual como comentarios Python.
+def make_executable(text):
+    r"""Convierte un texto (mezcla de código Python y bloques markdown/
+    docstrings multilínea) en código Python ejecutable.
 
-    Estrategia:
-      1. Detecta bloques markdown: secuencias de líneas consecutivas que no
-         son Python (no empiezan por letra reservada, import, def, etc. y no
-         están vacías).
-      2. Las comenta con prefijo '# '.
+    Estrategia: comentar sistemáticamente las líneas markdown para que
+    el texto completo sea Python válido.
     """
-    import keyword, builtins, re
+    import re
 
-    python_keywords = set(keyword.kwlist) | {
-        'plt', 'np', 'cv2', 'skimage', 'pd', 'sns',
-        'def', 'class', 'return', 'if', 'elif', 'else', 'for', 'while',
-        'try', 'except', 'with', 'as', 'from', 'import',
-        'print', 'len', 'range', 'enumerate', 'zip', 'open',
-        'raise', 'assert', 'pass', 'continue', 'break',
-        'os', 'sys', 'glob', 'json',
-        'img', 'f_hog', 'f_color_mom', 'f_color_hist', 'f_gabor',
-        'f_lbp', 'f_glcm', 'f_hu', 'kernel', 'result', 'results',
-        'fig', 'ax', 'axes', 'cm', 'rf', 'mlp', 'svm', 'stack',
-    }
-
-    # Patrones que indican código Python
-    python_patterns = [
-        r'^\s*(def|class|import|from|return|if|elif|else|for|while|try|except|with|raise|assert|pass|continue|break|yield|lambda|global|nonlocal)\b',
-        r'^\s*\w+\s*[=\(]',                       # asignación o llamada
-        r'^\s*\w+\.\w+',                          # acceso a atributo
-        r'^\s*(plt|np|cv2|pd|sns|fig|ax|cm|os|sys)\.', # métodos comunes
-        r'^\s*#',                                 # comentario Python
-        r'^\s*$',                                 # línea vacía
-        r'^\s*""".*"""$',                          # docstring de una línea
-        r'^\s*[\'\"]{3}',                          # inicio/fin de docstring
-        r'^\s*@',                                 # decorator
-        r'^\s*\w+\([^)]*\)\s*$',                  # función call sin asignación
-        r'^\s*[\[\{\(]',                           # apertura de corchete/lista/dict
-        r'^\s*\]|\}|\)',                           # cierre
-        r'^\s*\w+\s*:',                            # dict key o label
-        r'^\s*\d+\s*[,\)\]]',                      # número
-        r'^\s*[+\-*/]',                            # operador matemático
-    ]
-    compiled_patterns = [re.compile(p) for p in python_patterns]
-
-    def looks_like_python(line):
-        if not line.strip():
-            return True
-        if any(p.match(line) for p in compiled_patterns):
-            return True
-        return False
-
-    # Si la primera línea no parece Python (ej. "## A.1 ..."), coméntala
     lines = text.split('\n')
-    new_lines = []
-    in_python_block = False
-    pending_md_block = []
+    out = []
+    in_doc = False
+    doc_char = None
 
-    def flush_md():
-        for ml in pending_md_block:
-            new_lines.append('# ' + ml if not ml.startswith('# ') else ml)
-        pending_md_block.clear()
+    i = 0
+    n = len(lines)
 
-    for line in lines:
-        if looks_like_python(line):
-            flush_md()
-            new_lines.append(line)
-            in_python_block = True
-        else:
-            # línea que parece markdown: la acumulamos para comentar
-            pending_md_block.append(line)
-            in_python_block = False
-    flush_md()
+    while i < n:
+        line = lines[i]
+        stripped = line.strip()
 
-    return '\n'.join(new_lines)
+        # Docstring
+        if in_doc:
+            out.append('# ' + line.lstrip())
+            if doc_char and doc_char in line:
+                count = line.count(doc_char)
+                if line.lstrip().startswith(doc_char) and count == 1:
+                    in_doc = False
+                    doc_char = None
+                elif count >= 2:
+                    in_doc = False
+                    doc_char = None
+            i += 1
+            continue
+
+        # Apertura de docstring multilínea
+        if (stripped.startswith('"""') and stripped.count('"""') == 1) or \
+           (stripped.startswith('r"""') and stripped.count('"""') == 1):
+            in_doc = True
+            doc_char = '"""'
+            out.append('# ' + line.lstrip())
+            i += 1
+            continue
+
+        if (stripped.startswith("'''") and stripped.count("'''") == 1) or \
+           (stripped.startswith("r'''") and stripped.count("'''") == 1):
+            in_doc = True
+            doc_char = "'''"
+            out.append('# ' + line.lstrip())
+            i += 1
+            continue
+
+        # Docstring de una línea
+        if (stripped.startswith('"""') and stripped.endswith('"""') and
+            stripped.count('"""') == 2):
+            out.append('# ' + line.lstrip())
+            i += 1
+            continue
+        if (stripped.startswith("'''") and stripped.endswith("'''") and
+            stripped.count("'''") == 2):
+            out.append('# ' + line.lstrip())
+            i += 1
+            continue
+
+        # Comentario Python existente
+        if stripped.startswith('#'):
+            if (re.match(r'^#\s*#+', stripped) or
+                re.match(r'^#\s*\*', stripped) or
+                re.match(r'^#\s*\|', stripped) or
+                stripped.startswith('# ---') or
+                re.match(r'^#\s*\*+\w', stripped)):
+                out.append('# ' + line.lstrip())
+                i += 1
+                continue
+            out.append(line)
+            i += 1
+            continue
+
+        # Vacía
+        if not stripped:
+            out.append(line)
+            i += 1
+            continue
+
+        # Markdown puro
+        if (stripped.startswith('# ') or
+            stripped.startswith('## ') or
+            stripped.startswith('### ') or
+            stripped.startswith('|') or
+            stripped in ('---', '***', '___')):
+            out.append('# ' + line.lstrip())
+            i += 1
+            continue
+
+        if re.match(r'^\s*[-*+]\s', line) or re.match(r'^\s*\d+\.\s', line):
+            out.append('# ' + line.lstrip())
+            i += 1
+            continue
+
+        # ** en markdown vs Python
+        if '**' in line:
+            is_python_star = (
+                re.search(r'[\w\)\]]\s*\*\*\s*[\w\(]', line) or
+                re.search(r'\*\*\s*\{|\{\s*\*\*|\(\s*\*\*', line) or
+                re.search(r'\*\*\w+\s*[=,\)\}]', line) or
+                re.search(r'\*\*=', line) or
+                re.search(r'def\s+\w+\s*\([^)]*\*\*\w+', line)
+            )
+            if is_python_star:
+                out.append(line)
+            else:
+                out.append('# ' + line.lstrip())
+            i += 1
+            continue
+
+        # Asumir Python
+        out.append(line)
+        i += 1
+
+    return '\n'.join(out)
 
 def read_slice(path, start, end):
     """Lee líneas [start, end) de un archivo (1-based start, end exclusivo)."""
@@ -109,35 +154,36 @@ def read_slice(path, start, end):
 # Rangos exactos (verificados manualmente)
 # ============================================================================
 # tarea2_parte1_modulos_a_b_(2).py
+# Los rangos capturan el código Python real de cada módulo. El markdown
+# explicativo ya está en celdas markdown separadas generadas por el script.
 A_RANGES = {
-    "config":   (1, 36),       # título + cómo usar + librerías
-    "imgs":     (36, 105),     # imágenes + funciones auxiliares
-    "a1":       (105, 188),    # 0.3 + A.1 (incluye lo de 0.3 antes)
-    "a2":       (188, 307),    # A.2 modelos de ruido
-    "a3":       (307, 359),    # A.3 batalla filtros
-    "a3b":      (359, 475),    # A.3b barrido
-    "a4":       (475, 518),    # A.4 separabilidad
+    "config":   (1, 40),       # título + cómo usar + librerías
+    "imgs":     (40, 188),     # imágenes + 0.3 (definición de funciones auxiliares)
+    "a1":       (197, 360),    # A.1: incluye docstring + código de convolución
+    "a2":       (314, 419),    # A.2: código de ruido
+    "a3":       (419, 654),    # A.3 batalla + A.3b + A.4
+    "a3b":      (419, 654),    # alias
+    "a4":       (419, 654),    # alias
     "b1":       (654, 759),    # B.1 gradientes
     "b2":       (759, 838),    # B.2 Laplaciano
     "b3":       (838, 968),    # B.3 Canny + regla automática
-    "b4":       (968, 1079),   # B.4 unsharp + preguntas 1.4-1.5 (las saltamos)
+    "b4":       (968, 1079),   # B.4 unsharp
     "extras":   (1079, 1224),  # filtro homomórfico + Laws + galería + conclusiones
 }
 
 # tarea2_parte1_modulos_c_d_e.py
 CDE_RANGES = {
     "header":   (1, 33),       # título + cómo usar + librerías
-    "imgs":     (33, 195),     # imágenes + auxiliares (incluye 0.3)
-    "c1":       (195, 288),    # C.1 + estiramiento por percentiles
-    "c2":       (273, 326),    # C.2 visualización espectro
-    "p1_6":     (288, 326),    # pregunta 1.6 (no la incluyo, la redacto aparte)
-    "d1":       (326, 387),    # D.1 espectro + fase
-    "d2":       (345, 419),    # D.2 paso bajo + ringing
-    "d3":       (419, 470),    # D.3 notch
-    "d4":       (470, 530),    # D.4 equivalencia + pregunta 1.8 (la redacto aparte)
-    "e1":       (530, 574),    # E.1 banco Gabor + efecto σ
-    "e2":       (574, 662),    # E.2 vector de textura + rotación
-    "extras":   (662, 713),    # galería + conclusiones
+    "imgs":     (33, 195),     # imágenes + auxiliares
+    "c1":       (197, 326),    # C.1: código después del docstring
+    "c2":       (326, 530),    # C.2 + D.1 + D.2 + D.3 + D.4 + pregunta 1.8
+    "d1":       (326, 530),    # alias
+    "d2":       (326, 530),    # alias
+    "d3":       (326, 530),    # alias
+    "d4":       (326, 530),    # alias
+    "e1":       (533, 663),    # E.1 banco Gabor + efecto σ + E.2 + pregunta 1.9
+    "e2":       (533, 663),    # alias
+    "extras":   (663, 713),    # galería + conclusiones
 }
 
 
@@ -198,7 +244,7 @@ El enunciado exige **al menos dos imágenes**: una *natural* (paisaje, rostro, e
 
 **Protocolo de montaje** (cartulina blanca mate, luz cenital, sin flash) documentado en `docs/TOMAR_FOTOS.md`."""))
 
-nb.cells.append(code_cell(to_python_code(read_slice(PY_A, *A_RANGES["imgs"]))))
+nb.cells.append(code_cell(make_executable(read_slice(PY_A, *A_RANGES["imgs"]))))
 
 # ----- 2.2 Módulo A -----
 nb.cells.append(md_cell("""## 2.2 Módulo A · Convolución y filtros de suavizado (8.0 %)
@@ -215,7 +261,7 @@ Implementamos la convolución con dos ciclos `for` y comparamos contra `cv2.filt
 
 **Nota sobre convolución vs correlación.** `cv2.filter2D` realiza **correlación** (sin volteo). Para replicar convolución estricta, hay que voltear el kernel: `np.flipud(np.fliplr(h))`."""))
 
-nb.cells.append(code_cell(to_python_code(read_slice(PY_A, *A_RANGES["a1"]))))
+nb.cells.append(code_cell(make_executable(read_slice(PY_A, *A_RANGES["a1"]))))
 
 nb.cells.append(md_cell("""### A.2 Modelos de ruido
 
@@ -229,7 +275,7 @@ Contaminamos la imagen con cuatro modelos canónicos:
 
 El histograma revela la naturaleza: Gaussiano → campana centrada; S&P → picos en 0 y 255; speckle → multiplica la intensidad."""))
 
-nb.cells.append(code_cell(to_python_code(read_slice(PY_A, *A_RANGES["a2"]))))
+nb.cells.append(code_cell(make_executable(read_slice(PY_A, *A_RANGES["a2"]))))
 
 nb.cells.append(md_cell("""### A.3 «Batalla de filtros»
 
@@ -240,13 +286,13 @@ Aplicamos a cada imagen ruidosa los filtros de **media, Gaussiano, mediana, mín
 - Gaussiano → **Gaussiano** (óptimo para ruido gaussiano por máxima verosimilitud)
 - Speckle → **bilateral** (preserva bordes eliminando ruido intensidad-dependiente)"""))
 
-nb.cells.append(code_cell(to_python_code(read_slice(PY_A, *A_RANGES["a3"]))))
+nb.cells.append(code_cell(make_executable(read_slice(PY_A, *A_RANGES["a3"]))))
 
 nb.cells.append(md_cell("""### A.3b Barrido sistemático de parámetros
 
 Variamos sistemáticamente los parámetros del catálogo del enunciado (Tabla 2.1): tamaños de kernel (k=3, 5, 9, 15), σ del Gaussiano (0.5, 1, 2, 4), medianas (k=3, 5, 7), parámetros del bilateral. Esto genera una rejilla de combinaciones que confirma las observaciones puntuales de A.3."""))
 
-nb.cells.append(code_cell(to_python_code(read_slice(PY_A, *A_RANGES["a3b"]))))
+nb.cells.append(code_cell(make_executable(read_slice(PY_A, *A_RANGES["a3b"]))))
 
 nb.cells.append(md_cell("""### A.4 Separabilidad del kernel Gaussiano
 
@@ -256,7 +302,7 @@ $$G_{2D}(x,y) = G_{1D}(x) \\cdot G_{1D}(y)$$
 
 Esto permite reemplazar una convolución 2D de tamaño $K \\times K$ por **dos convoluciones 1D**, reduciendo el costo por píxel de $K^2$ a $2K$ operaciones (para K=31: de 961 a 62, **~15.5× más rápido**). Comparamos `cv2.getGaussianKernel`, la fórmula 2D directa y `cv2.filter2D` con la versión separable."""))
 
-nb.cells.append(code_cell(to_python_code(read_slice(PY_A, *A_RANGES["a4"]))))
+nb.cells.append(code_cell(make_executable(read_slice(PY_A, *A_RANGES["a4"]))))
 
 # ----- Preguntas 1.1–1.3 -----
 nb.cells.append(md_cell("""## 📝 Preguntas conceptuales del Módulo A
@@ -328,7 +374,7 @@ Comparamos cuatro kernels de gradiente:
 
 Mostramos la dirección del gradiente con un **mapa HSV** (matiz = ángulo, brillo = magnitud). Usamos `cv2.CV_64F` para no perder derivadas negativas (con `CV_8U`, **45 % de los píxeles** saturan o se pierden)."""))
 
-nb.cells.append(code_cell(to_python_code(read_slice(PY_A, *A_RANGES["b1"]))))
+nb.cells.append(code_cell(make_executable(read_slice(PY_A, *A_RANGES["b1"]))))
 
 nb.cells.append(md_cell("""### B.2 Segunda derivada: Laplaciano (4 y 8 vecinos), LoG y DoG
 
@@ -338,7 +384,7 @@ $$\\text{LoG} \\approx \\sigma^2 \\nabla^2 G_\\sigma, \\quad \\text{DoG} = G_{\\
 
 La correlación DoG vs LoG es **0.9445**, confirmando que el DoG aproxima bien al LoG con menos costo computacional."""))
 
-nb.cells.append(code_cell(to_python_code(read_slice(PY_A, *A_RANGES["b2"]))))
+nb.cells.append(code_cell(make_executable(read_slice(PY_A, *A_RANGES["b2"]))))
 
 nb.cells.append(md_cell("""### B.3 Canny paso a paso
 
@@ -352,7 +398,7 @@ Variamos σ = 1, 2, 3 y varias parejas de umbrales (50/150, 100/200, 20/60). Pro
 
 **Validación.** Nuestro Canny propio coincide con `cv2.Canny` con **F1 = 1.000** (precisión y recall perfectos)."""))
 
-nb.cells.append(code_cell(to_python_code(read_slice(PY_A, *A_RANGES["b3"]))))
+nb.cells.append(code_cell(make_executable(read_slice(PY_A, *A_RANGES["b3"]))))
 
 nb.cells.append(md_cell("""### B.4 Realce de nitidez: Unsharp masking y High-boost
 
@@ -369,7 +415,7 @@ $$g = f + k \\cdot (f - f_{suav})$$
 
 **En el proyecto.** El unsharp masking podría usarse en la Parte 2 para resaltar detalles de textura fina en los minerales, pero preferimos el CLAHE sobre L (LAB) que corrige la iluminación no uniforme sin introducir halos."""))
 
-nb.cells.append(code_cell(to_python_code(read_slice(PY_A, *A_RANGES["b4"]))))
+nb.cells.append(code_cell(make_executable(read_slice(PY_A, *A_RANGES["b4"]))))
 
 # ----- Preguntas 1.4–1.5 -----
 nb.cells.append(md_cell("""## 📝 Preguntas conceptuales del Módulo B
@@ -415,7 +461,7 @@ $$\\ln f(x,y) = \\ln i(x,y) + \\ln r(x,y)$$
 
 Aplicamos FFT, multiplicamos por $H(u,v)$ que atenúa bajas frecuencias ($\\gamma_L < 1$) y amplifica altas ($\\gamma_H > 1$), y volvemos al dominio espacial con $\\exp$. **En el proyecto**, este filtro sería una alternativa al CLAHE para fotos caseras con iluminación lateral."""))
 
-nb.cells.append(code_cell(to_python_code(read_slice(PY_A, *A_RANGES["extras"]))))
+nb.cells.append(code_cell(make_executable(read_slice(PY_A, *A_RANGES["extras"]))))
 
 # ----- 2.4 Módulo C -----
 nb.cells.append(md_cell("""## 2.4 Módulo C · Transformaciones de intensidad (4.0 %)
@@ -432,7 +478,7 @@ Las **transformaciones puntuales** modifican cada píxel de forma independiente 
 
 Graficamos las curvas $T(r)$ de las transformaciones negativa, logarítmica y gamma (γ=0.3, 0.5, 1.5, 2.5) en una misma figura y las aplicamos a una imagen subexpuesta y sobreexpuesta. Implementamos todas mediante tablas de búsqueda (`cv2.LUT`) para máxima eficiencia."""))
 
-nb.cells.append(code_cell(to_python_code(read_slice(PY_CDE, *CDE_RANGES["c1"]))))
+nb.cells.append(code_cell(make_executable(read_slice(PY_CDE, *CDE_RANGES["c1"]))))
 
 nb.cells.append(md_cell("""### C.2 Visualización del espectro de Fourier (aplicación de la transformación logarítmica)
 
@@ -440,7 +486,7 @@ Aplicamos la transformación logarítmica a la magnitud de la FFT de una imagen 
 
 El log comprime el rango dinámico enorme del espectro (razón max/mediana ≈ 9000×) y revela direcciones privilegiadas, picos de patrones periódicos y el decaimiento radial típico de las imágenes naturales."""))
 
-nb.cells.append(code_cell(to_python_code(read_slice(PY_CDE, *CDE_RANGES["c2"]))))
+nb.cells.append(code_cell(make_executable(read_slice(PY_CDE, *CDE_RANGES["c2"]))))
 
 # ----- Pregunta 1.6 -----
 nb.cells.append(md_cell("""## 📝 Pregunta 1.6 – Rango dinámico
@@ -481,7 +527,7 @@ Calculamos la FFT 2D, centramos con `fftshift` y mostramos magnitud (escala log)
 
 **Conclusión esperada.** La fase conserva más estructura perceptual que la magnitud."""))
 
-nb.cells.append(code_cell(to_python_code(read_slice(PY_CDE, *CDE_RANGES["d1"]))))
+nb.cells.append(code_cell(make_executable(read_slice(PY_CDE, *CDE_RANGES["d1"]))))
 
 nb.cells.append(md_cell("""### D.2 Filtros paso bajo y paso alto: Ideal, Butterworth (n = 1, 2, 4) y Gaussiano
 
@@ -497,7 +543,7 @@ Implementamos los filtros Ideal, Butterworth (n = 1, 2, 4) y Gaussiano para D₀
 
 Para n≥4, Butterworth también presenta ringing, aunque menor. El Gaussiano es siempre la opción más segura."""))
 
-nb.cells.append(code_cell(to_python_code(read_slice(PY_CDE, *CDE_RANGES["d2"]))))
+nb.cells.append(code_cell(make_executable(read_slice(PY_CDE, *CDE_RANGES["d2"]))))
 
 nb.cells.append(md_cell("""### D.3 Eliminación de ruido periódico (filtro rechaza-banda / notch)
 
@@ -505,7 +551,7 @@ Sumamos a la imagen un patrón sinusoidal (por ejemplo $20\\sin(2\\pi \\cdot 0.1
 
 Para N=512 y f=0.1 ciclos/px, los picos aparecen en $(\\Delta u, \\Delta v) = (\\pm 51, 0)$ en el espectro centrado."""))
 
-nb.cells.append(code_cell(to_python_code(read_slice(PY_CDE, *CDE_RANGES["d3"]))))
+nb.cells.append(code_cell(make_executable(read_slice(PY_CDE, *CDE_RANGES["d3"]))))
 
 nb.cells.append(md_cell("""### D.4 Equivalencia espacio–frecuencia
 
@@ -515,7 +561,7 @@ $$\\sigma_{espacial} \\approx \\frac{N}{2\\pi \\cdot D_0}$$
 
 Para N=512, D₀=30 → σ ≈ 2.72 px. Error máximo en interior (margen de 11 px): **6.73×10⁻³** — efectivamente idéntico, salvo por las condiciones de borde (la FFT asume periodicidad, mientras que `cv2.GaussianBlur` espeja los bordes)."""))
 
-nb.cells.append(code_cell(to_python_code(read_slice(PY_CDE, *CDE_RANGES["d4"]))))
+nb.cells.append(code_cell(make_executable(read_slice(PY_CDE, *CDE_RANGES["d4"]))))
 
 # ----- Preguntas 1.7–1.8 -----
 nb.cells.append(md_cell("""## 📝 Preguntas conceptuales del Módulo D
@@ -570,13 +616,13 @@ donde $(x', y')$ es el plano rotado por θ. Responde fuertemente a texturas con 
 
 Construimos un banco de **4 orientaciones** (0°, 45°, 90°, 135°) × **3 longitudes de onda** $\\lambda$ con `cv2.getGaborKernel`. Visualizamos los kernels y las respuestas sobre una imagen con texturas (tela, ladrillo, madera u hojas). Estudiamos el efecto del ancho de la envolvente σ."""))
 
-nb.cells.append(code_cell(to_python_code(read_slice(PY_CDE, *CDE_RANGES["e1"]))))
+nb.cells.append(code_cell(make_executable(read_slice(PY_CDE, *CDE_RANGES["e1"]))))
 
 nb.cells.append(md_cell("""### E.2 Vector de textura de 24 características
 
 Para cada respuesta del banco, calculamos la **media** y la **desviación estándar** de la energía. Concatenamos esos valores en un vector de **24 características** (12 filtros × 2 estadísticas) y lo comparamos entre dos texturas distintas. Estudiamos qué pasa si rotamos la textura 90° (preludio de la Pregunta 1.9)."""))
 
-nb.cells.append(code_cell(to_python_code(read_slice(PY_CDE, *CDE_RANGES["e2"]))))
+nb.cells.append(code_cell(make_executable(read_slice(PY_CDE, *CDE_RANGES["e2"]))))
 
 # ----- Pregunta 1.9 -----
 nb.cells.append(md_cell("""## 📝 Pregunta 1.9 – Orientación
@@ -654,6 +700,52 @@ import uuid
 for c in nb.cells:
     if not hasattr(c, 'id'):
         c['id'] = uuid.uuid4().hex[:8]
+
+# Post-procesado: detectar celdas code que en realidad son markdown
+# (tienen líneas que NO compilan como Python ejecutable)
+def cell_has_executable_code(cell):
+    """Verifica si una celda 'code' contiene líneas Python ejecutables
+    (sin contar comentarios ni líneas vacías). Si SÍ las tiene, debe ser code.
+    Si NO las tiene, es markdown embebido en comentarios."""
+    if cell.cell_type != 'code':
+        return True  # no es code, no importa
+    src = ''.join(cell.source) if isinstance(cell.source, list) else cell.source
+    # Extraer solo las líneas que NO son comentarios
+    non_comment_lines = []
+    for line in src.split('\n'):
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if stripped.startswith('#'):
+            continue
+        non_comment_lines.append(line)
+
+    if not non_comment_lines:
+        return False  # todo comentarios → es markdown
+
+    # Probar si las líneas no-comentadas compilan juntas como Python
+    code_to_test = '\n'.join(non_comment_lines)
+    try:
+        compile(code_to_test, '<test>', 'exec')
+        return True  # compila → es código real
+    except SyntaxError:
+        return False  # no compila → probablemente markdown
+
+for c in nb.cells:
+    if not cell_has_executable_code(c):
+        # Convertir a markdown limpiando los # iniciales
+        new_src = []
+        src = ''.join(c.source) if isinstance(c.source, list) else c.source
+        for line in src.split('\n'):
+            stripped = line.lstrip()
+            if stripped.startswith('# '):
+                new_src.append(stripped[2:])
+            elif stripped == '#':
+                new_src.append('')
+            else:
+                new_src.append(line)
+        c.cell_type = 'markdown'
+        c.source = '\n'.join(new_src)
 
 # Convertir a formato notebook nativo de nbformat
 nb_format = nbf.from_dict(nb)
