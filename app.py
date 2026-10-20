@@ -17,13 +17,19 @@ ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / "src"))
 import clasificador  # noqa: E402
 
-MODEL_PATH = ROOT / "model" / "modelo_minerales.pkl"
+# Modelo por defecto: v3 (mejor accuracy). Si no existe, fallback al v2.
+# Tras reentrenar con 6 minerales, regenerar y mantener este orden.
+MODEL_PATH = ROOT / "model" / "modelo_minerales_v3.pkl"
+if not MODEL_PATH.exists():
+    MODEL_PATH = ROOT / "model" / "modelo_minerales.pkl"
 
 CLASE_COLOR = {
     "cuarzo": "#5B9BD5",
     "pirita": "#D4A017",
     "malaquita": "#2E9E5B",
     "hematita": "#C0504D",
+    "calcita": "#F5F5DC",   # NUEVO v6 — blanco/crema (beige)
+    "amatista": "#9966CC",  # NUEVO v6 — violeta
 }
 
 COMPARAR = "Comparar los 4 modelos"

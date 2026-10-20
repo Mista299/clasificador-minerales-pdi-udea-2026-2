@@ -3,15 +3,17 @@
 Uso:
     python3 agregar_fotos_propias.py <carpeta_origen>
 
-La carpeta origen debe tener subcarpetas:
+La carpeta origen debe tener subcarpetas (en español o inglés):
     <carpeta_origen>/
     ├── cuarzo/      <- fotos de cuarzo
     ├── pirita/      <- fotos de pirita
     ├── malaquita/   <- fotos de malaquita
-    └── hematita/    <- fotos de hematita
+    ├── hematita/    <- fotos de hematita
+    ├── calcita/     <- fotos de calcita (NUEVO v6)
+    └── amatista/    <- fotos de amatista (NUEVO v6)
 
 O nombres en inglés:
-    quartz/  pyrite/  malachite/  hematite/
+    quartz/  pyrite/  malachite/  hematite/  calcite/  amethyst/
 
 Las fotos se copian a dataset/test/<clase_es>/celular_NNN.jpg
 """
@@ -28,7 +30,11 @@ CLASS_MAP = {
     "pirita": "pirita", "pyrite": "pirita",
     "malaquita": "malaquita", "malachite": "malaquita",
     "hematita": "hematita", "hematite": "hematita",
+    "calcita": "calcita", "calcite": "calcita",      # NUEVO v6
+    "amatista": "amatista", "amethyst": "amatista",  # NUEVO v6
 }
+
+ALL_CLASSES = ["cuarzo", "pirita", "malaquita", "hematita", "calcita", "amatista"]
 
 
 def main():
@@ -91,7 +97,7 @@ def main():
     print(f" ✓ {total} fotos propias agregadas al test set")
     print(f"{'='*60}")
     print("\nDistribución final del test set:")
-    for cls in ["cuarzo", "pirita", "malaquita", "hematita"]:
+    for cls in ALL_CLASSES:
         n = len(list((DATA / SPLIT / cls).glob("*.jpg")))
         print(f"  {cls:12s}: {n} imgs")
     print("\nEjecuta './run.sh' para re-entrenar y ver la nueva accuracy.")

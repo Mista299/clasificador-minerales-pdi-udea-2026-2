@@ -24,7 +24,7 @@ from sklearn.decomposition import PCA
 import pandas as pd
 
 DATA = Path(__file__).resolve().parent.parent / "data" / "dataset"
-CLASSES = ["cuarzo", "pirita", "malaquita", "hematita"]
+CLASSES = ["cuarzo", "pirita", "malaquita", "hematita", "calcita", "amatista"]
 
 
 def imread_safe(path):
@@ -191,7 +191,7 @@ def main():
     pca = PCA(n_components=2).fit(X_train_s)
     X_train_pca = pca.transform(X_train_s)
     fig, ax = plt.subplots(figsize=(8, 6))
-    colors = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728"]
+    colors = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b"]
     for i, (cls, c) in enumerate(zip(CLASSES, colors)):
         m = y_train == i
         ax.scatter(X_train_pca[m, 0], X_train_pca[m, 1], label=cls, alpha=0.75, s=50, c=c, edgecolor="k", linewidth=0.5)

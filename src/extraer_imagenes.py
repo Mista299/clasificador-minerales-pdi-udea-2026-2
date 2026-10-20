@@ -1,4 +1,4 @@
-"""Extrae imágenes de las 4 clases y organiza en train/val/test.
+"""Extrae imágenes de las 6 clases y organiza en train/val/test.
 
 Descarga los parquets del dataset tedqc/mineral-dataset (HuggingFace) a un
 cache local (data/_parquet_cache) bajo demanda: procesa los shards en orden y
@@ -8,6 +8,14 @@ Distribución por clase (60 imgs total):
   train: 42  (70%)
   val:    9  (15%)
   test:   9  (15%)  ← estos se reemplazarán luego con fotos propias
+
+Minerales incluidos (versión 6 clases):
+  - cuarzo:    translúcido/blanco
+  - pirita:    dorado metálico
+  - malaquita: verde intenso
+  - hematita:  gris metálico oscuro
+  - calcita:   blanco/incoloro (NUEVO)
+  - amatista:  violeta/lila (NUEVO)
 """
 from pathlib import Path
 import pyarrow.parquet as pq
@@ -29,7 +37,14 @@ REPO = "tedqc/mineral-dataset"
 OUT = Path(__file__).resolve().parent.parent / "data" / "dataset"
 CACHE = OUT.parent / "_parquet_cache"
 SPLITS = {"train": 42, "val": 9, "test": 9}
-TARGET = {"quartz": "cuarzo", "pyrite": "pirita", "malachite": "malaquita", "hematite": "hematita"}
+TARGET = {
+    "quartz": "cuarzo",
+    "pyrite": "pirita",
+    "malachite": "malaquita",
+    "hematite": "hematita",
+    "calcite": "calcita",     # NUEVO v6 — blanco/incoloro
+    "amethyst": "amatista",  # NUEVO v6 — violeta/lila
+}
 MAX_PER_CLASS = sum(SPLITS.values())  # 60
 
 from huggingface_hub import list_repo_files, hf_hub_download
