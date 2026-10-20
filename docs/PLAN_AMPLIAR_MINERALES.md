@@ -4,20 +4,34 @@
 
 Pasar de **4 → 6 clases** agregando dos minerales nuevos al banco de imágenes:
 - **Calcita** (CaCO₃) — blanco/incoloro, cristales romboédricos
-- **Galena** (PbS) — gris metálico, cristales cúbicos
+- **Amatista** (SiO₂ + impurezas Fe) — violeta/lila, variante del cuarzo
 
 ## 📊 Justificación de la elección
 
-| Mineral | Color | Textura | Razón |
-|---|---|---|---|
-| **Calcita** | Blanco/incoloro | Cristales romboédricos | Color único entre los actuales (todos tienen color fuerte) |
-| **Galena** | Gris metálico | Cúbica, brillo metálico | Complementa pirita (otro sulfuro) y agrega contraste oscuro |
+| Mineral | Color | Textura | Disponibilidad HF | Razón |
+|---|---|---|---|---|
+| **Calcita** | Blanco/incoloro | Cristales romboédricos | ~1,090 imgs ✅ | Color único entre los actuales; primer mineral sin color saturado |
+| **Amatista** | Violeta/lila | Vítrea cristalina | ~1,100 imgs ✅ | Color violeta único; el modelo aprende una subclase dentro del cuarzo |
 
-**Total:** 6 clases con buena diversidad visual:
-- 2 minerales claros (cuarzo, calcita)
-- 2 minerales metálicos (pirita, galena)
-- 1 mineral verde (malaquita)
-- 1 mineral oscuro/rojo (hematita)
+**Verificación de disponibilidad (HuggingFace `tedqc/mineral-dataset`, 5 shards muestreados, extrapolado a 58):**
+
+| Mineral | Conteo (5 shards) | Estimado total |
+|---|---|---|
+| quartz | 576 | ~6,700 |
+| hematite | 186 | ~2,150 |
+| topaz | 257 | ~3,000 |
+| chalcedony | 212 | ~2,500 |
+| calcite | 94 | ~1,090 ✅ |
+| amethyst | 96 | ~1,100 ✅ |
+| fluorite | 65 | ~750 |
+| pyrite | 52 | ~600 |
+| galena | 39 | ~450 ⚠️ |
+| azurite | 12 | ~140 ❌ |
+
+**Total: 6 clases con buena diversidad visual:**
+- 2 minerales claros/translúcidos (cuarzo, calcita)
+- 2 minerales con color distintivo (malaquita verde, amatista violeta)
+- 2 minerales metálicos/oscuros (pirita dorada, hematita gris-rojo)
 
 ## 📝 Cambios necesarios
 
@@ -47,8 +61,8 @@ TARGET = {
     "pyrite": "pirita",
     "malachite": "malaquita",
     "hematite": "hematita",
-    "calcite": "calcita",     # NUEVO
-    "galena": "galena",        # NUEVO
+    "calcite": "calcita",     # NUEVO - blanco/incoloro
+    "amethyst": "amatista",  # NUEVO - violeta/lila
 }
 ```
 
@@ -118,16 +132,16 @@ python3 ejecutar_todo.py --solo-parte2
 | Riesgo | Impacto | Mitigación |
 |---|---|---|
 | Calcita muy similar al cuarzo blanco | Confusión cuarzo-calcita | Aumentar fotos con variación de iluminación |
-| Galena similar a pirita en brillo | Confusión pirita-galena | Verificar que el modelo distinga por reflectividad |
+| Amatista es variante del cuarzo | Posible confusión cuarzo-amatista | Revisar la matriz de confusión para detectar este patrón |
 | Accuracy cae >15% | El modelo se vuelve poco confiable | Reducir a 5 clases (solo calcita) |
-| Dataset HF no tiene suficiente galena | Solo calcita (2 clases) | Investigar otras fuentes (Mindat, Robla) |
+| Malaquita tiene solo ~220 imgs en HF | Margen limitado para augmentation | Mantener 60 imgs/clase (suficiente) |
 
 ## 📊 Métricas esperadas
 
 | Escenario | Accuracy CV-5 | Accuracy Test |
 |---|---|---|
-| Calcita + Galena sin fotos caseras | 80-90% | 80-85% |
-| Con fotos caseras (10/clase) | 85-92% | 80-85% |
+| Calcita + Amatista sin fotos caseras | 80-88% | 75-82% |
+| Con fotos caseras (10/clase) | 85-92% | 80-88% |
 | Si accuracy < 70% | Reconsiderar minerales |
 
 ## 🗓️ Cronograma
@@ -143,14 +157,14 @@ python3 ejecutar_todo.py --solo-parte2
 
 ## 📌 Lista de verificación
 
-- [ ] Verificar disponibilidad de calcite y galena en HuggingFace
-- [ ] Comprar/adquirir muestras físicas (si se desea fotos caseras)
+- [x] Verificar disponibilidad de calcite y amethyst en HuggingFace ✅ (~1100 imgs cada uno)
+- [ ] Comprar/adquiririr muestras físicas (si se desea fotos caseras)
 - [ ] Backup del dataset y modelo actuales
-- [ ] Modificar `CLASSES` en 3 archivos
-- [ ] Modificar mapeo en `extraer_imagenes.py`
+- [ ] Modificar `CLASSES` en 3 archivos: añadir "calcita", "amatista"
+- [ ] Modificar mapeo en `extraer_imagenes.py`: añadir "calcite" → "calcita", "amethyst" → "amatista"
 - [ ] Re-descargar dataset
 - [ ] Reentrenar pipeline v3
-- [ ] Validar accuracy
+- [ ] Validar accuracy (esperado >75%)
 - [ ] Actualizar README del dataset
 - [ ] Regenerar informe IEEE con 6 clases
 - [ ] Actualizar `app.py`
