@@ -1,3 +1,0 @@
-
-Parte1 D-C:
-python notebook/tarea2_parte1_modulos_c_d_e.py
