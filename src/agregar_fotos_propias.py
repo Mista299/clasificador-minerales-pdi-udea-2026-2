@@ -8,12 +8,10 @@ La carpeta origen debe tener subcarpetas (en español o inglés):
     ├── cuarzo/      <- fotos de cuarzo
     ├── pirita/      <- fotos de pirita
     ├── malaquita/   <- fotos de malaquita
-    ├── hematita/    <- fotos de hematita
-    ├── calcita/     <- fotos de calcita (NUEVO v6)
-    └── amatista/    <- fotos de amatista (NUEVO v6)
+    └── hematita/    <- fotos de hematita
 
 O nombres en inglés:
-    quartz/  pyrite/  malachite/  hematite/  calcite/  amethyst/
+    quartz/  pyrite/  malachite/  hematite/
 
 Las fotos se copian a dataset/test/<clase_es>/celular_NNN.jpg
 """
@@ -30,11 +28,9 @@ CLASS_MAP = {
     "pirita": "pirita", "pyrite": "pirita",
     "malaquita": "malaquita", "malachite": "malaquita",
     "hematita": "hematita", "hematite": "hematita",
-    "calcita": "calcita", "calcite": "calcita",      # NUEVO v6
-    "amatista": "amatista", "amethyst": "amatista",  # NUEVO v6
 }
 
-ALL_CLASSES = ["cuarzo", "pirita", "malaquita", "hematita", "calcita", "amatista"]
+ALL_CLASSES = ["cuarzo", "pirita", "malaquita", "hematita"]
 
 
 def main():

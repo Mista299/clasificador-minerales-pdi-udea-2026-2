@@ -1,4 +1,4 @@
-"""Extrae imágenes de las 6 clases y organiza en train/val/test.
+"""Extrae imágenes de las 4 clases y organiza en train/val/test.
 
 Descarga los parquets del dataset tedqc/mineral-dataset (HuggingFace) a un
 cache local (data/_parquet_cache) bajo demanda: procesa los shards en orden y
@@ -9,13 +9,11 @@ Distribución por clase (60 imgs total):
   val:    9  (15%)
   test:   9  (15%)  ← estos se reemplazarán luego con fotos propias
 
-Minerales incluidos (versión 6 clases):
+Minerales incluidos:
   - cuarzo:    translúcido/blanco
   - pirita:    dorado metálico
   - malaquita: verde intenso
   - hematita:  gris metálico oscuro
-  - calcita:   blanco/incoloro (NUEVO)
-  - amatista:  violeta/lila (NUEVO)
 """
 from pathlib import Path
 import pyarrow.parquet as pq
@@ -42,8 +40,6 @@ TARGET = {
     "pyrite": "pirita",
     "malachite": "malaquita",
     "hematite": "hematita",
-    "calcite": "calcita",     # NUEVO v6 — blanco/incoloro
-    "amethyst": "amatista",  # NUEVO v6 — violeta/lila
 }
 MAX_PER_CLASS = sum(SPLITS.values())  # 60
 

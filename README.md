@@ -52,6 +52,68 @@ Tiempo del pipeline completo: ~3–5 min (la primera descarga del dataset toma m
 
 ---
 
+## 🧪 Ejecutar la Parte 1 — Taller de filtros
+
+La Parte 1 está organizada en dos módulos ejecutables. El comando recomendado es:
+
+```bash
+# Ejecuta los módulos A–B y C–E, y guarda todas las figuras
+python ejecutar_todo.py --solo-parte1
+```
+
+El comando ejecuta automáticamente:
+
+| Módulo | Contenido | Notebook fuente |
+|---|---|---|
+| **A–B** | Convolución, suavizado, modelos de ruido, realce y detección de bordes | `notebook/tarea2_parte1_modulos_a_b_(2).py` |
+| **C–E** | Transformaciones de intensidad, dominio de la frecuencia, notch, homomórfico y Gabor | `notebook/tarea2_parte1_modulos_c_d_e.py` |
+
+Las figuras se guardan automáticamente en:
+
+```text
+results/figures_taller/tarea2_parte1_modulos_a_b_(2)/
+results/figures_taller/tarea2_parte1_modulos_c_d_e/
+```
+
+### Ejecutar los módulos por separado
+
+Si solo necesitas revisar o repetir una sección:
+
+```bash
+# Módulos A–B: convolución, filtros de suavizado, bordes y realce
+python notebook/tarea2_parte1_modulos_a_b_\(2\).py
+
+# Módulos C–E: intensidad, frecuencia y Gabor
+python notebook/tarea2_parte1_modulos_c_d_e.py
+```
+
+> En algunos terminals es necesario escapar los paréntesis del nombre del archivo, como se muestra arriba. También puedes navegar a la carpeta y ejecutar `python tarea2_parte1_modulos_a_b_(2).py`.
+
+### Ejecutar en Google Colab
+
+1. Abre `notebook/Tarea2_Parte1_Completa.ipynb` en Google Colab.
+2. Sube tus imágenes de prueba al panel de archivos.
+3. En la celda de configuración, cambia las rutas dentro de `RUTAS`.
+4. Ejecuta todas las celdas con **Entorno de ejecución → Ejecutar todo**.
+
+Si las imágenes no se encuentran, el notebook utiliza imágenes de muestra de `scikit-image`, por lo que siempre puede completar la ejecución.
+
+### Qué cubre la Parte 1
+
+- **Módulo A:** convolución manual, tipos de borde, PSNR/SSIM, comparación de filtros de suavizado y separabilidad del kernel gaussiano.
+- **Módulo B:** Roberts, Prewitt, Sobel, Scharr, Laplaciano, LoG, DoG, Canny, unsharp masking y high-boost.
+- **Módulo C:** transformaciones de intensidad y CLAHE.
+- **Módulo D:** FFT, filtros Ideal/Butterworth/Gaussiano, notch y equivalencia espacio–frecuencia.
+- **Módulo E:** banco de filtros de Gabor y vector de textura.
+
+Para consultar la explicación conceptual de los filtros, revisa:
+
+```text
+docs/EXPLICACION_PARTE_1_A_B.md
+```
+
+---
+
 ## 📂 Estructura del proyecto
 
 ```
@@ -79,8 +141,12 @@ trabajo2/
 │   ├── build_notebook_clasificador.py  # genera el notebook
 │   └── generar_informe.py          # ⭐ genera informe IEEE (DOCX/HTML/PDF)
 │
-├── notebook/                      # Jupyter notebooks
-│   └── pipeline_clasificador.ipynb # ⭐ 31 celdas ejecutables
+├── notebook/                      # notebooks y scripts de la Parte 1
+│   ├── Tarea2_Parte1_Completa.ipynb
+│   ├── Tarea2_Parte1_Modulos_A_B (2).ipynb
+│   ├── tarea2_parte1_modulos_a_b_(2).py
+│   ├── tarea2_parte1_modulos_c_d_e.py
+│   └── pipeline_clasificador.ipynb # ⭐ pipeline de la Parte 2
 │
 ├── data/                           # dataset (regenerable con src/extraer_imagenes.py)
 │   ├── README.md                   # descripción del banco
@@ -98,6 +164,8 @@ trabajo2/
 │   ├── informe_ieee.docx           # editable
 │   ├── diapositivas.md             # slides (8 diapositivas)
 │   ├── PREGUNTAS_CONCEPTUALES.md   # respuestas 2.1, 2.2, 2.3, 2.4
+│   ├── EXPLICACION_PARTE_1_A_B.md  # explicación conceptual de filtros A–B
+│   ├── EXPLICACION_PARTE_2_DETECCION_MINERALES.md  # pipeline de la Parte 2
 │   ├── TOMAR_FOTOS.md              # guía para fotos con celular
 │   ├── INSTALACION.md              # instalación detallada
 │   └── MODELO_README.md            # cómo usar el .pkl en la GUI

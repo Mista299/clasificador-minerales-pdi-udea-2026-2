@@ -20,7 +20,7 @@ import cv2
 from skimage.feature import hog, local_binary_pattern, graycomatrix, graycoprops
 
 DATA = Path(__file__).resolve().parent.parent / "data" / "dataset"
-CLASSES = ["cuarzo", "pirita", "malaquita", "hematita", "calcita", "amatista"]
+CLASSES = ["cuarzo", "pirita", "malaquita", "hematita"]
 
 # Dimensiones por familia (mantener ORDEN para los slices)
 N_HOG = 1764

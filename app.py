@@ -17,19 +17,17 @@ ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / "src"))
 import clasificador  # noqa: E402
 
-# Modelo por defecto: v3 (mejor accuracy). Si no existe, fallback al v2.
-# Tras reentrenar con 6 minerales, regenerar y mantener este orden.
-MODEL_PATH = ROOT / "model" / "modelo_minerales_v3.pkl"
+# Modelo principal: voting ensemble RF + MLP + SVM. Si no existe, se usa el
+# Random Forest de la versión v3 como alternativa.
+MODEL_PATH = ROOT / "model" / "modelo_minerales.pkl"
 if not MODEL_PATH.exists():
-    MODEL_PATH = ROOT / "model" / "modelo_minerales.pkl"
+    MODEL_PATH = ROOT / "model" / "modelo_minerales_v3.pkl"
 
 CLASE_COLOR = {
     "cuarzo": "#5B9BD5",
     "pirita": "#D4A017",
     "malaquita": "#2E9E5B",
     "hematita": "#C0504D",
-    "calcita": "#F5F5DC",   # NUEVO v6 — blanco/crema (beige)
-    "amatista": "#9966CC",  # NUEVO v6 — violeta
 }
 
 COMPARAR = "Comparar los 4 modelos"
@@ -62,14 +60,26 @@ CSS = """
 
 @st.cache_resource
 def cargar_modelos():
-    """Carga el bundle y expone el ensemble + sus 3 estimadores ya entrenados."""
+    """Carga el bundle y expone el ensemble o sus estimadores ya entrenados.
+
+    El bundle principal contiene un VotingClassifier, mientras que el modelo
+    v3 puede contener un RandomForestClassifier individual. Por eso se
+    resuelven los nombres de los estimadores de forma compatible con ambos.
+    """
     bundle = joblib.load(MODEL_PATH)
-    ens = bundle["modelo"]
+    modelo = bundle["modelo"]
+
+    estimadores = getattr(modelo, "named_estimators_", None)
+    if estimadores is None:
+        # Un modelo individual (por ejemplo, Random Forest en la versión v3).
+        modelos = {MODELO_INFO["Random Forest"]: modelo}
+        return bundle, modelos
+
     modelos = {
-        "Voting Ensemble": ens,
-        "Random Forest": ens.named_estimators_["rf"],
-        "MLP": ens.named_estimators_["mlp"],
-        "SVM (RBF)": ens.named_estimators_["svm"],
+        "Voting Ensemble": modelo,
+        "Random Forest": estimadores["rf"],
+        "MLP": estimadores["mlp"],
+        "SVM (RBF)": estimadores["svm"],
     }
     return bundle, modelos
 
@@ -146,9 +156,11 @@ clases = bundle["clases"]
 
 with st.sidebar:
     st.header("Configuración")
-    nombre_modelo = st.selectbox("Modelo de reconocimiento",
-                                 list(MODELO_INFO)[:-1] + [COMPARAR])
-    st.caption(MODELO_INFO[nombre_modelo])
+    opciones_modelo = list(modelos.keys())
+    if len(opciones_modelo) > 1:
+        opciones_modelo.append(COMPARAR)
+    nombre_modelo = st.selectbox("Modelo de reconocimiento", opciones_modelo)
+    st.caption(MODELO_INFO.get(nombre_modelo, bundle["modelo_tipo"]))
     st.divider()
     st.markdown(
         f"**Descriptor:** Color + GLCM "
@@ -189,7 +201,9 @@ for f in archivos:
             filas.append({"Modelo": nombre,
                           "Predicción": clases[i].capitalize(),
                           "Confianza": f"{p.max() * 100:.1f}%"})
-        idx, proba = predecir(img, modelos["Voting Ensemble"], bundle)
+        # El modelo principal puede ser un ensemble o un modelo individual.
+        modelo_principal = modelos.get("Voting Ensemble", bundle["modelo"])
+        idx, proba = predecir(img, modelo_principal, bundle)
         dt_ms = (time.time() - t0) * 1000
         mostrar_resultado(f.name, img, idx, proba, dt_ms, clases,
                           comparar=pd.DataFrame(filas))

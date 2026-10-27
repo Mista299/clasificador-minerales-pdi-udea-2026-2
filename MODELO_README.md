@@ -12,7 +12,8 @@
 bundle = joblib.load('modelo_minerales.pkl')
 modelo = bundle['modelo']        # VotingClassifier (RF+MLP+SVM, soft)
 scaler = bundle['scaler']        # StandardScaler
-clases = bundle['clases']        # ['cuarzo', 'pirita', 'malaquita', 'hematita']
+clases = bundle['clases']        # clases disponibles en el modelo
+labels = bundle.get('labels')    # índices enteros correspondientes a las clases
 slice_start = bundle['slice_start']  # 1764
 slice_end = bundle['slice_end']      # 1802
 ```
@@ -34,7 +35,8 @@ def predecir(img_bgr):
     feats_s = scaler.transform(feats_slice.reshape(1, -1))
     idx = modelo.predict(feats_s)[0]
     proba = modelo.predict_proba(feats_s)[0]
-    return bundle['clases'][idx], proba
+    label_pos = bundle.get('labels', list(range(len(bundle['clases'])))).index(idx)
+    return bundle['clases'][label_pos], proba
 
 # Ejemplo
 img = cv2.imread('foto_cuartzo.jpg')

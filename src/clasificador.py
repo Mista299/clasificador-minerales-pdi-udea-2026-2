@@ -24,7 +24,7 @@ from sklearn.decomposition import PCA
 import pandas as pd
 
 DATA = Path(__file__).resolve().parent.parent / "data" / "dataset"
-CLASSES = ["cuarzo", "pirita", "malaquita", "hematita", "calcita", "amatista"]
+CLASSES = ["cuarzo", "pirita", "malaquita", "hematita"]
 
 
 def imread_safe(path):

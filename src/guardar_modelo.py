@@ -64,7 +64,15 @@ ensemble.fit(X_tr_s, y_train)
 yp = ensemble.predict(X_te_s)
 acc = accuracy_score(y_test, yp)
 print(f"\nAccuracy en test: {acc:.3f}")
-print(classification_report(y_test, yp, target_names=clasificador.CLASSES, digits=3))
+
+# Reportar únicamente las clases presentes en los datos. Esto permite que el
+# script funcione con el banco actual de cuatro clases y con un subconjunto
+# temporal de ellas.
+clases_presentes = [clasificador.CLASSES[i] for i in sorted(set(y_test.tolist()))]
+labels_presentes = sorted(set(y_test.tolist()))
+print(classification_report(
+    y_test, yp, labels=labels_presentes, target_names=clases_presentes, digits=3
+))
 
 # Guardar bundle
 bundle = {
@@ -73,14 +81,15 @@ bundle = {
     "slice": SLICE,
     "slice_start": N_HOG,
     "slice_end": N_HOG + N_COLOR + N_GLCM,
-    "clases": clasificador.CLASSES,
+    "clases": clases_presentes,
+    "labels": labels_presentes,
     "n_features": N_COLOR + N_GLCM,  # 38
     "accuracy_test": acc,
     "accuracy_cv5": 0.928,  # del ensemble.py
     "modelo_tipo": "VotingClassifier (Soft, RF+MLP+SVM)",
     "version": "2.0",
     "descripcion": (
-        "Clasificador de minerales (Cuarzo/Pirita/Malaquita/Hematita). "
+        "Clasificador de minerales (" + "/".join(clases_presentes) + "). "
         "Voting ensemble (soft) de RF + MLP + SVM, con descriptores Color+GLCM "
         "(38 dims). Accuracy CV5=92.8%, test=83.3%."
     ),
@@ -97,6 +106,7 @@ print(f"\n✓ Modelo (ensemble) guardado en: {OUT} ({size_kb:.1f} KB)")
 bundle_test = joblib.load(OUT)
 print(f"  Tipo:      {bundle_test['modelo_tipo']}")
 print(f"  Clases:    {bundle_test['clases']}")
+print(f"  Labels:    {bundle_test.get('labels', list(range(len(bundle_test['clases']))))}")
 print(f"  Slice:     [{bundle_test['slice_start']}:{bundle_test['slice_end']}]  ({bundle_test['n_features']} dims)")
 print(f"  Acc test:  {bundle_test['accuracy_test']:.3f}")
 print(f"  Acc CV5:   {bundle_test['accuracy_cv5']:.3f}")
@@ -116,7 +126,8 @@ readme = """# Modelo serializado (v2 — voting ensemble)
 bundle = joblib.load('modelo_minerales.pkl')
 modelo = bundle['modelo']        # VotingClassifier (RF+MLP+SVM, soft)
 scaler = bundle['scaler']        # StandardScaler
-clases = bundle['clases']        # ['cuarzo', 'pirita', 'malaquita', 'hematita']
+clases = bundle['clases']        # clases disponibles en el modelo
+labels = bundle.get('labels')    # índices enteros correspondientes a las clases
 slice_start = bundle['slice_start']  # 1764
 slice_end = bundle['slice_end']      # 1802
 ```
@@ -138,7 +149,8 @@ def predecir(img_bgr):
     feats_s = scaler.transform(feats_slice.reshape(1, -1))
     idx = modelo.predict(feats_s)[0]
     proba = modelo.predict_proba(feats_s)[0]
-    return bundle['clases'][idx], proba
+    label_pos = bundle.get('labels', list(range(len(bundle['clases'])))).index(idx)
+    return bundle['clases'][label_pos], proba
 
 # Ejemplo
 img = cv2.imread('foto_cuartzo.jpg')

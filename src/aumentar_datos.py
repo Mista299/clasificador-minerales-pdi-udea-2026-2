@@ -15,7 +15,7 @@ import numpy as np
 import cv2
 
 DATA = Path(__file__).resolve().parent.parent / "data" / "dataset"
-CLASSES = ["cuarzo", "pirita", "malaquita", "hematita", "calcita", "amatista"]
+CLASSES = ["cuarzo", "pirita", "malaquita", "hematita"]
 TARGET_PER_CLASS = 90   # aumentar de 42 a 90 imgs en train
 SEED = 42
 
